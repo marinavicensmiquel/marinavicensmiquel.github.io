@@ -5,7 +5,7 @@ body {
   margin-left: auto;
   margin-right: auto;
   position: center;
-  width: 1000px;
+  width: 900px;
 }
 
 
@@ -20,7 +20,7 @@ body {
   text-align: center;
   background: #42AADE;
   color: white;
-  width: 1000px;
+  width: 900px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -74,7 +74,7 @@ li {
 
 
 h2 {
-  margin-left: 100px;
+  margin-left: 55px;
   margin-right: 50px;
   margin-top: 50px;
 }
@@ -94,7 +94,7 @@ h3 {
   overflow: hidden;
   background-color: #333;
   text-align: center;
-  width: 1000px;
+  width: 900px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -175,7 +175,7 @@ footer {
   width: 100%;
   margin-left: auto;
   margin-right: auto;
-  width: 1000px;
+  width: 900px;
 }
 
 
@@ -224,7 +224,7 @@ p2 {
 
 .column2 {
   float: left;
-  width: 750px;
+  width: 690px;
   padding: 10px;
   height: 100px; /* Should be removed. Only for demonstration */
 }
