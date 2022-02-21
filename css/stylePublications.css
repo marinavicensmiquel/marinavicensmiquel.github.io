@@ -5,7 +5,8 @@ body {
   margin-left: auto;
   margin-right: auto;
   position: center;
-  width: 900px;
+  width: 100%;
+  height: 100%;
 }
 
 
@@ -23,6 +24,8 @@ body {
   width: 900px;
   margin-left: auto;
   margin-right: auto;
+  width: 100%;
+  height: 100%;
 }
 
 /* Increase the font size of the heading */
