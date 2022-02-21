@@ -4,7 +4,8 @@ body {
   margin-left: auto;
   margin-right: auto;
   position: center;
-  width: 900px;
+  width: 100%;
+  height: 100%;
 }
 
 
@@ -29,6 +30,8 @@ body {
   text-align: center;
   background: #42AADE;
   color: white;
+  width: 100%;
+  height: 100%;
 }
 
 /* Increase the font size of the heading */
