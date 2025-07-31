@@ -204,14 +204,14 @@ p {
   float: center;
   text-align: right;
   width: 150px;
-  height: 100px; /* Should be removed. Only for demonstration */
+  /*height: 100px; /* Should be removed. Only for demonstration */
 }
 
 .column2 {
   float: left;
   width: 690px;
   padding: 10px;
-  height: 100px; /* Should be removed. Only for demonstration */
+  /*height: 100px; /* Should be removed. Only for demonstration */
 }
 
 /* Clear floats after the columns */
