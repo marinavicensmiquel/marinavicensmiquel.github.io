@@ -44,11 +44,19 @@
 
   // ✅ Mostrar notificación
   function enviarNotificacion() {
-    new Notification("🎉 Bon dia!", {
+  // Si hay un Service Worker activo, usarlo para mostrar la notificación
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({
+      title: "🎉 Bon dia!",
       body: "La teva web et saluda 🌞",
       icon: "icon-192.png"
     });
+    console.log("📨 Notificación enviada al SW");
+  } else {
+    console.warn("⚠️ No hay Service Worker activo aún");
   }
+}
+
 
   // ✅ Botón para pedir permiso manualmente (obligatorio en iOS)
   document.addEventListener("DOMContentLoaded", () => {
