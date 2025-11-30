@@ -4,7 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Notificaciones de prueba</title>
+
+  <!-- 🔗 Manifiesto e integración con iOS -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Benestar">
+  <link rel="apple-touch-icon" href="icon-192.png">
 </head>
+
 <body>
   <h2>🔔 Notificaciones automáticas cada minuto</h2>
   <p>Si ves este texto, agrega esta página a tu pantalla de inicio para probar en iPhone.</p>
@@ -17,18 +25,17 @@
         enviarNotificacion();
         setInterval(enviarNotificacion, 60000); // cada 1 minuto
       } else {
-        console.log("❌ Permiso denegado");
+        console.log("❌ Permiso denegado o bloqueado");
       }
     }
 
     function enviarNotificacion() {
-      new Notification("🎉 Bon diaa!", {
-        body: "Tu página web te saluda cada minuto 🌞",
+      new Notification("🎉 Bon dia!", {
+        body: "La teva web et saluda cada minut 🌞",
         icon: "https://cdn-icons-png.flaticon.com/512/616/616408.png"
       });
     }
 
-    // Solo iniciar si el navegador soporta notificaciones
     if ("Notification" in window) {
       pedirPermiso();
     } else {
