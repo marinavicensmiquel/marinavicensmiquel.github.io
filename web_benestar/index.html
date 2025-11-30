@@ -18,29 +18,38 @@
   <p>Si ves este texto, agrega esta página a tu pantalla de inicio para probar en iPhone.</p>
 
   <script>
-    async function pedirPermiso() {
-      const permiso = await Notification.requestPermission();
-      if (permiso === "granted") {
-        console.log("✅ Permiso concedido");
-        enviarNotificacion();
-        setInterval(enviarNotificacion, 60000); // cada 1 minuto
-      } else {
-        console.log("❌ Permiso denegado o bloqueado");
-      }
-    }
+  // ✅ Registrar el Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log("✅ Service Worker registrado"))
+      .catch(err => console.log("❌ Error al registrar SW:", err));
+  }
 
-    function enviarNotificacion() {
-      new Notification("🎉 Bon dia!", {
-        body: "La teva web et saluda cada minut 🌞",
-        icon: "https://cdn-icons-png.flaticon.com/512/616/616408.png"
-      });
-    }
-
-    if ("Notification" in window) {
-      pedirPermiso();
+  // 🔔 Código de notificaciones locales
+  async function pedirPermiso() {
+    const permiso = await Notification.requestPermission();
+    if (permiso === "granted") {
+      console.log("✅ Permiso concedido");
+      enviarNotificacion();
+      setInterval(enviarNotificacion, 10000); // cada 10 segundos
     } else {
-      alert("Tu navegador no soporta notificaciones.");
+      console.log("❌ Permiso denegado o bloqueado");
     }
-  </script>
+  }
+
+  function enviarNotificacion() {
+    new Notification("🎉 Bon dia!", {
+      body: "La teva web et saluda cada minut 🌞",
+      icon: "icon-192.png"
+    });
+  }
+
+  if ("Notification" in window) {
+    pedirPermiso();
+  } else {
+    alert("Tu navegador no soporta notificaciones.");
+  }
+</script>
+
 </body>
 </html>
