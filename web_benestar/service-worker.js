@@ -1,26 +1,53 @@
-// service-worker.js
 // ===================================================
-// Este archivo permite que la PWA reciba notificaciones
-// incluso si la app está cerrada o el móvil bloqueado.
+// Service Worker - Benestar PWA
+// ===================================================
+// Permite mostrar notificaciones tanto locales (desde la app)
+// como push (desde servidor). Compatible con iOS y Android.
 // ===================================================
 
-// Escucha eventos 'push' (desde el servidor)
-self.addEventListener('push', function(event) {
+// 📨 1. Escuchar mensajes enviados desde la app (local)
+self.addEventListener('message', event => {
+  const data = event.data;
+  if (data && data.title) {
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: data.icon || 'icon-192.png',
+      badge: data.icon || 'icon-192.png'
+    });
+    console.log('[SW] 📢 Notificación local mostrada');
+  }
+});
+
+// 📡 2. Escuchar notificaciones push (desde un servidor o servicio externo)
+self.addEventListener('push', event => {
   const data = event.data ? event.data.json() : {};
   const title = data.title || '✨ Notificación Benestar';
   const options = {
     body: data.body || 'Bon dia! 🌞',
-    icon: 'icon-192.png',
-    badge: 'icon-192.png',
+    icon: data.icon || 'icon-192.png',
+    badge: data.icon || 'icon-192.png'
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+  console.log('[SW] 📡 Notificación push recibida');
 });
 
-// Escucha cuando el usuario toca la notificación
-self.addEventListener('notificationclick', function(event) {
+// 👆 3. Cuando el usuario toca la notificación
+self.addEventListener('notificationclick', event => {
   event.notification.close();
   event.waitUntil(
-    clients.openWindow('https://marinavicensmiquel.github.io/web_benestar')
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      for (const client of clientList) {
+        if (client.url.includes('/web_benestar') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('https://marinavicensmiquel.github.io/web_benestar');
+      }
+    })
   );
+  console.log('[SW] 👆 Notificación clicada');
 });
