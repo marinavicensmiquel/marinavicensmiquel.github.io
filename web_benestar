@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notificaciones de prueba</title>
+</head>
+<body>
+  <h2>🔔 Notificaciones automáticas cada minuto</h2>
+  <p>Si ves este texto, agrega esta página a tu pantalla de inicio para probar en iPhone.</p>
+
+  <script>
+    async function pedirPermiso() {
+      const permiso = await Notification.requestPermission();
+      if (permiso === "granted") {
+        console.log("✅ Permiso concedido");
+        enviarNotificacion();
+        setInterval(enviarNotificacion, 60000); // cada 1 minuto
+      } else {
+        console.log("❌ Permiso denegado");
+      }
+    }
+
+    function enviarNotificacion() {
+      new Notification("🎉 Bon diaa!", {
+        body: "Tu página web te saluda cada minuto 🌞",
+        icon: "https://cdn-icons-png.flaticon.com/512/616/616408.png"
+      });
+    }
+
+    // Solo iniciar si el navegador soporta notificaciones
+    if ("Notification" in window) {
+      pedirPermiso();
+    } else {
+      alert("Tu navegador no soporta notificaciones.");
+    }
+  </script>
+</body>
+</html>
