@@ -3,122 +3,95 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Benestar – Debug Notificaciones</title>
+  <title>Benestar – Notificaciones Push</title>
 
-  <!-- 🔗 Manifiesto e integración con iOS -->
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Benestar">
   <link rel="apple-touch-icon" href="icon-192.png">
 
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    #log {
-      margin-top: 20px;
-      border: 1px solid #ccc;
-      padding: 10px;
-      font-size: 14px;
-      background: #fafafa;
-      white-space: pre-wrap;
-      height: 200px;
-      overflow-y: auto;
-    }
+    body { font-family: sans-serif; padding: 20px; background: #fafafa; }
+    h2 { color: #4CAF50; }
     button {
       font-size: 18px;
       padding: 12px 20px;
-      margin-top: 20px;
       border-radius: 8px;
       background: #4CAF50;
       color: white;
       border: none;
+      cursor: pointer;
     }
+    pre { white-space: pre-wrap; background: #fff; padding: 10px; border: 1px solid #ccc; height: 250px; overflow-y: auto; }
   </style>
 </head>
 
 <body>
-  <h2>🔔 Notificaciones automáticas cada 10 segundos (debug)</h2>
-  <p>Si ves este texto, agrega esta página a tu pantalla de inicio para probar en iPhone.</p>
+  <h2>🔔 Benestar – Notificaciones Push</h2>
+  <p>Prueba las notificaciones automáticas en segundo plano y en tu iPhone.</p>
 
-  <button id="activar">🔔 Activar notificacions</button>
-  <div id="log">📋 Registro de eventos:\n</div>
+  <button onclick="solicitarPermiso()">✅ Activar notificaciones</button>
+  <pre id="log">📋 Registro de eventos:\n</pre>
+
+  <!-- SDKs de Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-messaging-compat.js"></script>
 
   <script>
     const log = (msg) => {
       console.log(msg);
-      const div = document.getElementById("log");
-      div.textContent += msg + "\n";
+      document.getElementById("log").textContent += "\n" + msg;
     };
 
-    log("📘 Script principal cargado correctamente");
+    // Configuración Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyARM97493F5pd_QXhR6vRKIn897Q9yKQc",
+      authDomain: "benestarpwa.firebaseapp.com",
+      projectId: "benestarpwa",
+      storageBucket: "benestarpwa.appspot.com",
+      messagingSenderId: "487141570676",
+      appId: "1:487141570676:web:83af17edc0d0d0b6b5b921"
+    };
 
-    // 1️⃣ Registrar Service Worker
-    if ("serviceWorker" in navigator) {
-      log("🧩 Service Worker soportado. Intentando registrar...");
-      navigator.serviceWorker.register("service-worker.js")
-        .then(reg => {
-          log("✅ SW registrado con éxito: " + reg.scope);
-          if (navigator.serviceWorker.controller) {
-            log("🔄 SW ya controla la página.");
-          } else {
-            log("⌛ Esperando a que el SW tome control. Recarga si es necesario.");
-          }
-        })
-        .catch(err => {
-          log("❌ Error al registrar SW: " + err);
-        });
-    } else {
-      log("🚫 Este navegador NO soporta Service Workers.");
-    }
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
 
-    // 2️⃣ Pedir permiso de notificaciones
-    async function pedirPermiso() {
-      log("📨 Solicitando permiso de notificaciones...");
-      if (!("Notification" in window)) {
-        log("🚫 Este navegador NO soporta la API Notification.");
-        alert("Tu navegador no soporta notificaciones.");
-        return;
-      }
-      try {
-        const permiso = await Notification.requestPermission();
-        log("🔐 Estado del permiso: " + permiso);
-        if (permiso === "granted") {
-          enviarNotificacion(); // primera
-          setInterval(enviarNotificacion, 10000); // cada 10 s
-        } else {
-          log("⚠️ Permiso denegado o bloqueado.");
-          alert("Activa las notificaciones en Ajustes > Benestar");
+    // Solicitar permiso y obtener token
+    async function solicitarPermiso() {
+      log("📨 Solicitando permiso de notificación...");
+      const permiso = await Notification.requestPermission();
+      if (permiso === "granted") {
+        try {
+          const token = await messaging.getToken({
+            vapidKey: "BCmbjjP84nLgeIpyqqhfy58e32dVpmnCn0o7-rAWHIPgDBH6rCFp95lU1nvETH94eMoPbcUZlQzuVWzHs9JZX9s"
+          });
+          log("✅ Token FCM obtenido:\n" + token);
+          alert("Token generado correctamente. Cópialo del registro y pégalo en Firebase Cloud Messaging → Enviar mensaje.");
+        } catch (err) {
+          log("❌ Error al obtener token: " + err.message);
         }
-      } catch (e) {
-        log("💥 Error al pedir permiso: " + e);
-      }
-    }
-
-    // 3️⃣ Enviar notificación
-    function enviarNotificacion() {
-      log("🚀 Intentando enviar notificación...");
-      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-          title: "🎉 Bon dia!",
-          body: "La teva web et saluda 🌞",
-          icon: "icon-192.png"
-        });
-        log("📨 Mensaje enviado al SW.");
       } else {
-        log("⚠️ No hay Service Worker activo aún. Recarga la app.");
+        log("⚠️ Permiso denegado. Activa notificaciones manualmente.");
       }
     }
 
-    // Escuchar mensajes que vienen del Service Worker
-if (navigator.serviceWorker) {
-  navigator.serviceWorker.addEventListener("message", (event) => {
-    if (event.data && event.data.log) {
-      log(event.data.log);
-    }
-  });
-}
+    // Notificación cuando la app está abierta
+    messaging.onMessage((payload) => {
+      log("📩 Notificación recibida (foreground): " + JSON.stringify(payload));
+      new Notification(payload.notification.title, {
+        body: payload.notification.body,
+        icon: payload.notification.icon
+      });
+    });
 
-    document.getElementById("activar").onclick = pedirPermiso;
+    // Registrar Service Worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("firebase-messaging-sw.js")
+        .then(reg => log("🧩 Service Worker registrado con éxito: " + reg.scope))
+        .catch(err => log("❌ Error registrando SW: " + err));
+    } else {
+      log("🚫 Este navegador no soporta Service Workers.");
+    }
   </script>
 </body>
 </html>
