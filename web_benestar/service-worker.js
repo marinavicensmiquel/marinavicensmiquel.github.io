@@ -1,55 +1,32 @@
 // ===================================================
-// Service Worker - Benestar PWA (Versión final)
-// ===================================================
-// Muestra notificaciones locales (enviadas desde index.html)
-// y soporta notificaciones push (si se configuran en el futuro)
+// Service Worker - Benestar (Debug visual en pantalla)
 // ===================================================
 
-// 📨 1. Mostrar notificación cuando la app envía un mensaje local
-self.addEventListener('message', event => {
+// Enviar mensajes de log al cliente (para mostrarlos en pantalla)
+function sendLog(msg) {
+  self.clients.matchAll({ includeUncontrolled: true }).then(clients => {
+    for (const client of clients) {
+      client.postMessage({ log: msg });
+    }
+  });
+}
+
+// 📨 Escuchar mensajes enviados desde la app
+self.addEventListener("message", (event) => {
   const data = event.data;
   if (data && data.title) {
-    console.log('[SW] 📢 Recibido mensaje local, mostrando notificación...');
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: data.icon || 'icon-192.png',
-      badge: data.icon || 'icon-192.png'
-    });
+    sendLog("📩 [SW] Mensaje recibido: " + data.title);
+    try {
+      self.registration.showNotification(data.title, {
+        body: data.body,
+        icon: data.icon || "icon-192.png",
+        badge: data.icon || "icon-192.png"
+      });
+      sendLog("✅ [SW] Notificación intentada");
+    } catch (e) {
+      sendLog("💥 [SW] Error mostrando notificación: " + e.message);
+    }
   } else {
-    console.log('[SW] ⚠️ Mensaje recibido sin título.');
+    sendLog("⚠️ [SW] Mensaje sin título recibido");
   }
-});
-
-// 📡 2. Escuchar notificaciones push (desde servidor)
-self.addEventListener('push', event => {
-  const data = event.data ? event.data.json() : {};
-  const title = data.title || '✨ Notificación Benestar';
-  const options = {
-    body: data.body || 'Bon dia! 🌞',
-    icon: data.icon || 'icon-192.png',
-    badge: data.icon || 'icon-192.png'
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-  console.log('[SW] 📡 Notificación push recibida');
-});
-
-// 👆 3. Cuando el usuario toca la notificación
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      for (const client of clientList) {
-        if (client.url.includes('/web_benestar') && 'focus' in client) {
-          return client.focus();
-        }
-      }
-      if (clients.openWindow) {
-        return clients.openWindow('https://marinavicensmiquel.github.io/web_benestar');
-      }
-    })
-  );
-  console.log('[SW] 👆 Notificación clicada');
 });
