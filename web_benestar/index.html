@@ -109,6 +109,15 @@
       }
     }
 
+    // Escuchar mensajes que vienen del Service Worker
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if (event.data && event.data.log) {
+      log(event.data.log);
+    }
+  });
+}
+
     document.getElementById("activar").onclick = pedirPermiso;
   </script>
 </body>
