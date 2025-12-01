@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Notificaciones de prueba</title>
+  <title>Benestar – Debug Notificaciones</title>
 
   <!-- 🔗 Manifiesto e integración con iOS -->
   <link rel="manifest" href="manifest.json">
@@ -11,76 +11,105 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Benestar">
   <link rel="apple-touch-icon" href="icon-192.png">
+
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    #log {
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      font-size: 14px;
+      background: #fafafa;
+      white-space: pre-wrap;
+      height: 200px;
+      overflow-y: auto;
+    }
+    button {
+      font-size: 18px;
+      padding: 12px 20px;
+      margin-top: 20px;
+      border-radius: 8px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+    }
+  </style>
 </head>
 
 <body>
-  <h2>🔔 Notificaciones automáticas cada 10 segundos (modo debugging)</h2>
+  <h2>🔔 Notificaciones automáticas cada 10 segundos (debug)</h2>
   <p>Si ves este texto, agrega esta página a tu pantalla de inicio para probar en iPhone.</p>
 
-  <script>
-    // ✅ Registrar el Service Worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(reg => {
-          console.log("✅ Service Worker registrado:", reg.scope);
+  <button id="activar">🔔 Activar notificacions</button>
+  <div id="log">📋 Registro de eventos:\n</div>
 
-          // Forzar control inmediato (algunas veces necesario en iOS)
+  <script>
+    const log = (msg) => {
+      console.log(msg);
+      const div = document.getElementById("log");
+      div.textContent += msg + "\n";
+    };
+
+    log("📘 Script principal cargado correctamente");
+
+    // 1️⃣ Registrar Service Worker
+    if ("serviceWorker" in navigator) {
+      log("🧩 Service Worker soportado. Intentando registrar...");
+      navigator.serviceWorker.register("service-worker.js")
+        .then(reg => {
+          log("✅ SW registrado con éxito: " + reg.scope);
           if (navigator.serviceWorker.controller) {
-            console.log("SW ya controla esta página");
+            log("🔄 SW ya controla la página.");
           } else {
-            console.log("Esperando a que el SW tome control...");
+            log("⌛ Esperando a que el SW tome control. Recarga si es necesario.");
           }
         })
-        .catch(err => console.error("❌ Error SW:", err));
+        .catch(err => {
+          log("❌ Error al registrar SW: " + err);
+        });
+    } else {
+      log("🚫 Este navegador NO soporta Service Workers.");
     }
 
-    // ✅ Función para solicitar permiso al usuario
+    // 2️⃣ Pedir permiso de notificaciones
     async function pedirPermiso() {
+      log("📨 Solicitando permiso de notificaciones...");
+      if (!("Notification" in window)) {
+        log("🚫 Este navegador NO soporta la API Notification.");
+        alert("Tu navegador no soporta notificaciones.");
+        return;
+      }
       try {
         const permiso = await Notification.requestPermission();
+        log("🔐 Estado del permiso: " + permiso);
         if (permiso === "granted") {
-          console.log("✅ Permiso concedido");
-          enviarNotificacion(); // primera notificación inmediata
-          setInterval(enviarNotificacion, 10000); // cada 10 segundos
+          enviarNotificacion(); // primera
+          setInterval(enviarNotificacion, 10000); // cada 10 s
         } else {
-          console.log("❌ Permiso denegado o bloqueado");
+          log("⚠️ Permiso denegado o bloqueado.");
           alert("Activa las notificaciones en Ajustes > Benestar");
         }
       } catch (e) {
-        console.error("Error al pedir permiso:", e);
+        log("💥 Error al pedir permiso: " + e);
       }
     }
 
-    // ✅ Mostrar notificación a través del SW
+    // 3️⃣ Enviar notificación
     function enviarNotificacion() {
+      log("🚀 Intentando enviar notificación...");
       if (navigator.serviceWorker && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({
           title: "🎉 Bon dia!",
           body: "La teva web et saluda 🌞",
           icon: "icon-192.png"
         });
-        console.log("📨 Notificación enviada al SW");
+        log("📨 Mensaje enviado al SW.");
       } else {
-        console.warn("⚠️ No hay Service Worker activo aún. Refresca la app una vez.");
+        log("⚠️ No hay Service Worker activo aún. Recarga la app.");
       }
     }
 
-    // ✅ Añadir botón manual (iOS requiere interacción del usuario)
-    document.addEventListener("DOMContentLoaded", () => {
-      const btn = document.createElement("button");
-      btn.textContent = "🔔 Activar notificacions";
-      btn.style = `
-        font-size:18px;
-        padding:12px 20px;
-        margin-top:20px;
-        border-radius:8px;
-        background:#4CAF50;
-        color:white;
-        border:none;
-      `;
-      btn.onclick = pedirPermiso;
-      document.body.appendChild(btn);
-    });
+    document.getElementById("activar").onclick = pedirPermiso;
   </script>
 </body>
 </html>
