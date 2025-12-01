@@ -33,9 +33,6 @@
   <button onclick="solicitarPermiso()">✅ Activar notificaciones</button>
   <pre id="log">📋 Registro de eventos:\n</pre>
 
-  <!-- 🔄 Proxy para redirigir el Service Worker -->
-<script src="./benestar_sw_proxy.js"></script>
-
   <!-- SDKs de Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-messaging-compat.js"></script>
@@ -88,12 +85,9 @@
     });
 
 
-// Registrar Service Worker corrigiendo la ruta en subcarpeta
+// Registrar Service Worker con nombre actualizado
 if ("serviceWorker" in navigator) {
-  // Detectar ruta base automáticamente
-  const swPath = `${window.location.pathname.replace(/\/[^/]*$/, "")}/firebase-messaging-sw.js`;
-
-  navigator.serviceWorker.register(swPath)
+  navigator.serviceWorker.register("/benestar-firebase-messaging-sw.js")
     .then((reg) => {
       log("🧩 Service Worker registrado con éxito: " + reg.scope);
     })
@@ -103,6 +97,8 @@ if ("serviceWorker" in navigator) {
 } else {
   log("🚫 Este navegador no soporta Service Workers.");
 }
+
+
 
 
   </script>
