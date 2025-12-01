@@ -58,16 +58,16 @@
 
   // ✅ Registrar el Service Worker correctamente
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker
-      .register("/firebase-messaging-sw.js", { scope: "/" })
-      .then((reg) => {
-        messaging.useServiceWorker(reg);
-        log("🧩 Service Worker registrado: " + reg.scope);
-      })
-      .catch((err) => log("❌ Error registrando SW: " + err));
-  } else {
-    log("🚫 Este navegador no soporta Service Workers.");
-  }
+  navigator.serviceWorker
+    .register("/firebase-messaging-sw.js", { scope: "/" })
+    .then((reg) => {
+      log("🧩 Service Worker registrado: " + reg.scope);
+    })
+    .catch((err) => log("❌ Error registrando SW: " + err));
+} else {
+  log("🚫 Este navegador no soporta Service Workers.");
+}
+
 
   // ✅ Solicitar permiso y obtener token
   async function solicitarPermiso() {
