@@ -38,69 +38,76 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-messaging-compat.js"></script>
 
   <script>
-    const log = (msg) => {
-      console.log(msg);
-      document.getElementById("log").textContent += "\n" + msg;
-    };
+  const log = (msg) => {
+    console.log(msg);
+    document.getElementById("log").textContent += "\n" + msg;
+  };
 
-    // Configuración Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyARM97493F50pd_QXhR6vRKIn897Q9yKQc",
-      authDomain: "benestarpwa.firebaseapp.com",
-      projectId: "benestarpwa",
-      storageBucket: "benestarpwa.appspot.com",
-      messagingSenderId: "487141570676",
-      appId: "1:487141570676:web:83af17edc0d0d0b6b5b921"
-    };
+  // Configuración Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyARM97493F50pd_QXhR6vRKIn897Q9yKQc",
+    authDomain: "benestarpwa.firebaseapp.com",
+    projectId: "benestarpwa",
+    storageBucket: "benestarpwa.appspot.com",
+    messagingSenderId: "487141570676",
+    appId: "1:487141570676:web:83af17edc0d0d0b6b5b921"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const messaging = firebase.messaging();
+  firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
 
-    // Solicitar permiso y obtener token
-    async function solicitarPermiso() {
-      log("📨 Solicitando permiso de notificación...");
-      const permiso = await Notification.requestPermission();
-      if (permiso === "granted") {
-        try {
-          const token = await messaging.getToken({
-            vapidKey: "BCmbjjP84nLgeIpyqqhfy58e32dVpmnCn0o7-rAWHIPgDBH6rCFp95lU1nvETH94eMoPbcUZlQzuVWzHs9JZX9s"
-          });
-          log("✅ Token FCM obtenido:\n" + token);
-          alert("Token generado correctamente. Cópialo del registro y pégalo en Firebase Cloud Messaging → Enviar mensaje.");
-        } catch (err) {
-          log("❌ Error al obtener token: " + err.message);
-        }
-      } else {
-        log("⚠️ Permiso denegado. Activa notificaciones manualmente.");
+  // ✅ Registrar el Service Worker correctamente
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register("/firebase-messaging-sw.js", { scope: "/" })
+      .then((reg) => {
+        messaging.useServiceWorker(reg);
+        log("🧩 Service Worker registrado: " + reg.scope);
+      })
+      .catch((err) => log("❌ Error registrando SW: " + err));
+  } else {
+    log("🚫 Este navegador no soporta Service Workers.");
+  }
+
+  // ✅ Solicitar permiso y obtener token
+  async function solicitarPermiso() {
+    log("📨 Solicitando permiso de notificación...");
+    const permiso = await Notification.requestPermission();
+    if (permiso === "granted") {
+      try {
+        const token = await messaging.getToken({
+          vapidKey: "BCmbjjP84nLgeIpyqqhfy58e32dVpmnCn0o7-rAWHIPgDBH6rCFp95lU1nvETH94eMoPbcUZlQzuVWzHs9JZX9s"
+        });
+        log("✅ Token FCM obtenido:\n" + token);
+
+        // ✅ Suscribir automáticamente al topic "all"
+        await fetch(`https://iid.googleapis.com/iid/v1/${token}/rel/topics/all`, {
+          method: "POST",
+          headers: {
+            "Authorization": "key=AAAAH5poKng:APA91bFi_nwOoC1iGl_rMI7J5P9M6y00C6PkpqZboUVyqeqhCSw4DVaX-OfTeH83ue-GnDW2MBz4R9d6Pj5bKJepA6Hi6cKf_X2RGeV66iuwvTE7WbULlT",
+            "Content-Type": "application/json"
+          }
+        });
+
+        log("📡 Suscrito correctamente al tema 'all' 🎉");
+        alert("Token generado y suscrito correctamente. ¡Ya puedes enviar mensajes al tema 'all' desde tu Mac!");
+      } catch (err) {
+        log("❌ Error al obtener token: " + err.message);
       }
+    } else {
+      log("⚠️ Permiso denegado. Activa notificaciones manualmente.");
     }
+  }
 
-    // Notificación cuando la app está abierta
-    messaging.onMessage((payload) => {
-      log("📩 Notificación recibida (foreground): " + JSON.stringify(payload));
-      new Notification(payload.notification.title, {
-        body: payload.notification.body,
-        icon: payload.notification.icon
-      });
+  // ✅ Notificación en primer plano
+  messaging.onMessage((payload) => {
+    log("📩 Notificación recibida (foreground): " + JSON.stringify(payload));
+    new Notification(payload.notification.title, {
+      body: payload.notification.body,
+      icon: payload.notification.icon || "icon-192.png",
     });
+  });
+</script>
 
-
-// Registrar Service Worker con nombre actualizado
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/firebase-messaging-sw.js")
-    .then((reg) => {
-      log("🧩 Service Worker registrado con éxito: " + reg.scope);
-    })
-    .catch((err) => {
-      log("❌ Error registrando SW: " + err);
-    });
-} else {
-  log("🚫 Este navegador no soporta Service Workers.");
-}
-
-
-
-
-  </script>
 </body>
 </html>
