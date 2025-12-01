@@ -84,14 +84,19 @@
       });
     });
 
-    // Registrar Service Worker
-    if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/web_benestar/firebase-messaging-sw.js")
-        .then(reg => log("🧩 Service Worker registrado con éxito: " + reg.scope))
-        .catch(err => log("❌ Error registrando SW: " + err));
-    } else {
-      log("🚫 Este navegador no soporta Service Workers.");
-    }
+    // Registrar Service Worker con corrección de ruta
+if ("serviceWorker" in navigator) {
+  const swPath = location.hostname === "marinavicensmiquel.github.io"
+    ? "/firebase-messaging-sw.js"  // cuando estás en producción (GitHub Pages)
+    : "/web_benestar/firebase-messaging-sw.js"; // si pruebas en local
+
+  navigator.serviceWorker.register(swPath)
+    .then(reg => log("🧩 Service Worker registrado con éxito: " + reg.scope))
+    .catch(err => log("❌ Error registrando SW: " + err));
+} else {
+  log("🚫 Este navegador no soporta Service Workers.");
+}
+
   </script>
 </body>
 </html>
