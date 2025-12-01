@@ -1,24 +1,26 @@
 // ===================================================
-// Service Worker - Benestar PWA
+// Service Worker - Benestar PWA (Versión final)
 // ===================================================
-// Permite mostrar notificaciones tanto locales (desde la app)
-// como push (desde servidor). Compatible con iOS y Android.
+// Muestra notificaciones locales (enviadas desde index.html)
+// y soporta notificaciones push (si se configuran en el futuro)
 // ===================================================
 
-// 📨 1. Escuchar mensajes enviados desde la app (local)
+// 📨 1. Mostrar notificación cuando la app envía un mensaje local
 self.addEventListener('message', event => {
   const data = event.data;
   if (data && data.title) {
+    console.log('[SW] 📢 Recibido mensaje local, mostrando notificación...');
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: data.icon || 'icon-192.png',
       badge: data.icon || 'icon-192.png'
     });
-    console.log('[SW] 📢 Notificación local mostrada');
+  } else {
+    console.log('[SW] ⚠️ Mensaje recibido sin título.');
   }
 });
 
-// 📡 2. Escuchar notificaciones push (desde un servidor o servicio externo)
+// 📡 2. Escuchar notificaciones push (desde servidor)
 self.addEventListener('push', event => {
   const data = event.data ? event.data.json() : {};
   const title = data.title || '✨ Notificación Benestar';
