@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-
+ 
 const PROJECT_ID = "benestarpwa";
 
 export const sendPush = async (req, res) => {
