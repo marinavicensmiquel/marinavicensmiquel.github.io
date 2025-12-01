@@ -59,7 +59,7 @@
   // ✅ Registrar el Service Worker correctamente
   if ("serviceWorker" in navigator) {
   navigator.serviceWorker
-    .register("firebase-messaging-sw.js", { scope: "/" })
+    .register("/firebase-messaging-sw.js", { scope: "/" })
     .then((reg) => {
       log("🧩 Service Worker registrado: " + reg.scope);
     })
