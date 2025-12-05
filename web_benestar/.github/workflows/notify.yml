@@ -1,0 +1,14 @@
+name: Send Benestar notifications
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # every 5 minutes
+  workflow_dispatch:        # allows manual trigger
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Firebase notification
+        run: |
+          curl "https://us-central1-benestarpwa.cloudfunctions.net/sendNotification?title=💚+Benestar&body=It’s+time+for+your+wellbeing+check"

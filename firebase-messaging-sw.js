@@ -12,15 +12,11 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// ✅ Notificación en segundo plano (cuando el sitio no está abierto)
 messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Mensaje recibido en background:', payload);
-
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: payload.notification.icon || 'icon-192.png'
-  };
-
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  console.log('[SW] Background message received:', payload);
+  const { title, body, icon } = payload.notification;
+  self.registration.showNotification(title, {
+    body,
+    icon: icon || 'icon-192.png',
+  });
 });

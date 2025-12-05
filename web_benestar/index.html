@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Benestar – Notificaciones Push</title>
+  <title>Benestar – Push Notifications</title>
 
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -27,87 +27,81 @@
 </head>
 
 <body>
-  <h2>🔔 Benestar – Notificaciones Push</h2>
-  <p>Prueba las notificaciones automáticas en segundo plano y en tu iPhone.</p>
+  <h2>🔔 Benestar – Push Notifications</h2>
+  <p>Receive automatic wellbeing reminders, even when the app is closed.</p>
 
-  <button onclick="solicitarPermiso()">✅ Activar notificaciones</button>
-  <pre id="log">📋 Registro de eventos:\n</pre>
+  <button onclick="requestPermission()">Activate Notifications</button>
+  <pre id="log">📋 Log:\n</pre>
 
-  <!-- SDKs de Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-messaging-compat.js"></script>
 
   <script>
-  const log = (msg) => {
-    console.log(msg);
-    document.getElementById("log").textContent += "\n" + msg;
-  };
+    const log = (msg) => {
+      console.log(msg);
+      document.getElementById("log").textContent += "\n" + msg;
+    };
 
-  // Configuración Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyARM97493F50pd_QXhR6vRKIn897Q9yKQc",
-    authDomain: "benestarpwa.firebaseapp.com",
-    projectId: "benestarpwa",
-    storageBucket: "benestarpwa.appspot.com",
-    messagingSenderId: "487141570676",
-    appId: "1:487141570676:web:83af17edc0d0d0b6b5b921"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyARM97493F50pd_QXhR6vRKIn897Q9yKQc",
+      authDomain: "benestarpwa.firebaseapp.com",
+      projectId: "benestarpwa",
+      storageBucket: "benestarpwa.appspot.com",
+      messagingSenderId: "487141570676",
+      appId: "1:487141570676:web:83af17edc0d0d0b6b5b921"
+    };
 
-  firebase.initializeApp(firebaseConfig);
-  const messaging = firebase.messaging();
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
 
-  // ✅ Registrar el Service Worker correctamente
-  if ("serviceWorker" in navigator) {
-  navigator.serviceWorker
-    .register("/firebase-messaging-sw.js", { scope: "/" })
-    .then((reg) => {
-      log("🧩 Service Worker registrado: " + reg.scope);
-    })
-    .catch((err) => log("❌ Error registrando SW: " + err));
-} else {
-  log("🚫 Este navegador no soporta Service Workers.");
-}
-
-
-  // ✅ Solicitar permiso y obtener token
-  async function solicitarPermiso() {
-    log("📨 Solicitando permiso de notificación...");
-    const permiso = await Notification.requestPermission();
-    if (permiso === "granted") {
-      try {
-        const token = await messaging.getToken({
-          vapidKey: "BCmbjjP84nLgeIpyqqhfy58e32dVpmnCn0o7-rAWHIPgDBH6rCFp95lU1nvETH94eMoPbcUZlQzuVWzHs9JZX9s"
-        });
-        log("✅ Token FCM obtenido:\n" + token);
-
-        // ✅ Suscribir automáticamente al topic "all"
-        await fetch(`https://iid.googleapis.com/iid/v1/${token}/rel/topics/all`, {
-          method: "POST",
-          headers: {
-            "Authorization": "key=AAAAH5poKng:APA91bFi_nwOoC1iGl_rMI7J5P9M6y00C6PkpqZboUVyqeqhCSw4DVaX-OfTeH83ue-GnDW2MBz4R9d6Pj5bKJepA6Hi6cKf_X2RGeV66iuwvTE7WbULlT",
-            "Content-Type": "application/json"
-          }
-        });
-
-        log("📡 Suscrito correctamente al tema 'all' 🎉");
-        alert("Token generado y suscrito correctamente. ¡Ya puedes enviar mensajes al tema 'all' desde tu Mac!");
-      } catch (err) {
-        log("❌ Error al obtener token: " + err.message);
-      }
+    // Register the Firebase service worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("./firebase-messaging-sw.js", { scope: "./" })
+        .then((reg) => log("🧩 Service Worker registered: " + reg.scope))
+        .catch((err) => log("❌ Service Worker registration failed: " + err));
     } else {
-      log("⚠️ Permiso denegado. Activa notificaciones manualmente.");
+      log("🚫 Service Workers not supported in this browser.");
     }
-  }
 
-  // ✅ Notificación en primer plano
-  messaging.onMessage((payload) => {
-    log("📩 Notificación recibida (foreground): " + JSON.stringify(payload));
-    new Notification(payload.notification.title, {
-      body: payload.notification.body,
-      icon: payload.notification.icon || "icon-192.png",
+    // Ask for permission and subscribe to topic "all"
+    async function requestPermission() {
+      log("📨 Requesting notification permission...");
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        try {
+          const token = await messaging.getToken({
+            vapidKey: "BCmbjjP84nLgeIpyqqhfy58e32dVpmnCn0o7-rAWHIPgDBH6rCFp95lU1nvETH94eMoPbcUZlQzuVWzHs9JZX9s"
+          });
+          log("✅ FCM Token obtained:\n" + token);
+
+          // Subscribe to topic "all"
+          await fetch(`https://iid.googleapis.com/iid/v1/${token}/rel/topics/all`, {
+            method: "POST",
+            headers: {
+              "Authorization": "key=AAAAH5poKng:APA91bFi_nwOoC1iGl_rMI7J5P9M6y00C6PkpqZboUVyqeqhCSw4DVaX-OfTeH83ue-GnDW2MBz4R9d6Pj5bKJepA6Hi6cKf_X2RGeV66iuwvTE7WbULlT",
+              "Content-Type": "application/json"
+            }
+          });
+
+          log("📡 Subscribed to topic 'all' successfully.");
+          alert("Notifications activated! You will now receive reminders.");
+        } catch (err) {
+          log("❌ Error getting token: " + err.message);
+        }
+      } else {
+        log("⚠️ Permission denied. Enable notifications manually.");
+      }
+    }
+
+    // Foreground notifications
+    messaging.onMessage((payload) => {
+      log("📩 Notification received (foreground): " + JSON.stringify(payload));
+      new Notification(payload.notification.title, {
+        body: payload.notification.body,
+        icon: payload.notification.icon || "icon-192.png",
+      });
     });
-  });
-</script>
-
+  </script>
 </body>
 </html>
