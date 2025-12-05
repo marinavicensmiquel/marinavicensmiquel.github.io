@@ -22,7 +22,7 @@ exports.testNotification = functions.pubsub
       console.error("❌ Error sending test notification:", error);
     }
 
-    return null;
+    return null; 
   });
 
 // ✅ Manual test endpoint (still available)
