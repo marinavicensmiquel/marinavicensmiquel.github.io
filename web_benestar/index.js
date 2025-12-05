@@ -1,35 +1,43 @@
-import fetch from "node-fetch";
- 
-const PROJECT_ID = "benestarpwa";
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+admin.initializeApp();
 
-export const sendPush = async (req, res) => {
-  const accessToken = await getAccessToken();
-
-  const message = {
-    message: {
+// ✅ Scheduled notification every 10 seconds (for testing)
+exports.testNotification = functions.pubsub
+  .schedule("every 10 seconds")
+  .onRun(async () => {
+    const message = {
       topic: "all",
       notification: {
-        title: "Benestar 🌿",
-        body: "Recordatori automàtic cada 10 segons ⏱️"
-      }
-    }
-  };
+        title: "🧪 Test Notification",
+        body: "This message is sent every 10 seconds for debugging.",
+        icon: "icon-192.png",
+      },
+    };
 
-  const response = await fetch(`https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${accessToken}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(message)
+    try {
+      await admin.messaging().send(message);
+      console.log("✅ Test notification sent to topic 'all'");
+    } catch (error) {
+      console.error("❌ Error sending test notification:", error);
+    }
+
+    return null;
   });
 
-  const result = await response.text();
-  console.log(result);
-  res.send(result);
-};
+// ✅ Manual test endpoint (still available)
+exports.sendNotification = functions.https.onRequest(async (req, res) => {
+  const { title = "Manual Test", body = "Triggered from browser or curl" } = req.query;
 
-async function getAccessToken() {
-  const { execSync } = await import("child_process");
-  return execSync("gcloud auth application-default print-access-token").toString().trim();
-}
+  try {
+    await admin.messaging().send({
+      topic: "all",
+      notification: { title, body },
+    });
+    console.log(`🚀 Sent manual notification: ${title}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("❌ Error sending manual notification:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
